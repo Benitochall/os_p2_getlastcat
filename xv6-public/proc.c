@@ -102,6 +102,8 @@ found:
   sp -= sizeof *p->tf;
   p->tf = (struct trapframe*)sp;
 
+
+
   // Set up new context to start executing at forkret,
   // which returns to trapret.
   sp -= 4;
@@ -111,6 +113,8 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
+
+  p->readid = 0; // intially sets the amount of reads to  
 
   return p;
 }
@@ -141,6 +145,8 @@ userinit(void)
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
+
+  // if the name is == cat save all the args on the global val
 
   // this assignment to p->state lets other cores
   // run this process. the acquire forces the above
@@ -495,6 +501,8 @@ kill(int pid)
   release(&ptable.lock);
   return -1;
 }
+
+
 
 //PAGEBREAK: 36
 // Print a process listing to console.  For debugging.
