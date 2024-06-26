@@ -16,6 +16,9 @@
 #include "file.h"
 #include "fcntl.h"
 
+int usedcat = 0; 
+char stored_arg[512];
+
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
 static int
@@ -399,7 +402,6 @@ sys_exec(void)
   char *path, *argv[MAXARG];
   int i;
   uint uargv, uarg;
-
   if(argstr(0, &path) < 0 || argint(1, (int*)&uargv) < 0){
     return -1;
   }
@@ -415,7 +417,39 @@ sys_exec(void)
     }
     if(fetchstr(uarg, &argv[i]) < 0)
       return -1;
+  } 
+   char * cat = "cat"; 
+   if (strncmp(argv[0], cat, 3) == 0){
+	   //copy all args onto it
+     // what I need to do in this fucntion is to iterate through all the args
+  //   // the variable I should be the next to the last arg
+     int currlength = 0; 
+     int invalidFile =0; 
+     int noArgsPassed = 1;
+     usedcat = 1; 
+
+     for(int j = 1; argv[j]; j++) {
+       noArgsPassed = 0; 
+       struct inode *ip;
+       currlength = j; 
+       // check if the argv[j] is a valid file, 
+       if((ip = namei(argv[j])) == 0){
+         // this is where we have a bad file
+         invalidFile = 1; 
+         char * badfile = "Invalid filename";
+         safestrcpy(stored_arg, badfile , strlen(badfile)+1);
+         break; 
+       }
+     }
+	if (invalidFile == 0 && noArgsPassed == 0){
+  		 safestrcpy(stored_arg, argv[currlength], strlen(argv[currlength])+1);
+     }
+     else if (noArgsPassed == 1){
+         char * noArgs = "No args were passed";
+         safestrcpy(stored_arg, noArgs , strlen(noArgs)+1);
+     }
   }
+
   return exec(path, argv);
 }
 
@@ -442,3 +476,22 @@ sys_pipe(void)
   fd[1] = fd1;
   return 0;
 }
+int sys_getlastcat(void) {
+	// this is where we copy the stored ara\g
+	//cprintf("here"); 
+	char * userbuf;
+
+	// this is taking userbuf and copying it 
+ 	if (argstr(0, &userbuf) != 0){
+        	 return -1;
+ 	}
+	safestrcpy(userbuf, stored_arg, strlen(stored_arg)+1);
+	
+  	if (usedcat == 0){
+     		char * catNotCalled = "Cat has not yet been called"; 
+     		safestrcpy(userbuf, catNotCalled, strlen(catNotCalled)+1);
+	}  	
+	return 0;
+
+}
+

@@ -23,6 +23,9 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int getyear(void); 
+int getreadcount(void); 
+int getlastcat(char *); 
 
 // ulib.c
 int stat(const char*, struct stat*);

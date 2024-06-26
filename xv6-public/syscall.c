@@ -13,6 +13,9 @@
 // library system call function. The saved user %esp points
 // to a saved program counter, and then the first argument.
 
+// here is the global counter 
+int readcount =0; 
+
 // Fetch the int at addr from the current process.
 int
 fetchint(uint addr, int *ip)
@@ -103,6 +106,7 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+extern int sys_getlastcat(void); 
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -126,6 +130,7 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_getlastcat] sys_getlastcat, 
 };
 
 void
@@ -135,6 +140,7 @@ syscall(void)
   struct proc *curproc = myproc();
 
   num = curproc->tf->eax;
+
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     curproc->tf->eax = syscalls[num]();
   } else {
